@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Background Remover & Enhancer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 { margin-bottom: 0.5rem; color: #1a1a1a; }
+        p { color: #666; margin-bottom: 2rem; }
+        
+        #drop-zone {
+            border: 2px dashed #4a90e2;
+            border-radius: 8px;
+            padding: 40px;
+            cursor: pointer;
+            transition: background 0.3s, border-color 0.3s;
+            background: #f8fbff;
+        }
+        #drop-zone.hover {
+            background: #e1f0ff;
+            border-color: #2171cd;
+        }
+        #drop-zone p { margin: 0; font-weight: 500; color: #4a90e2; }
+
+        .status {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #28a745;
+            display: none;
+        }
+        .error {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #dc3545;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Image Processor</h1>
+    <p>Drag an image here to make the background transparent and sharpen the black details.</p>
+    
+    <div id="drop-zone">
+        <p>Drop image here or click to upload</p>
+        <input type="file" id="file-input" style="display: none;" accept="image/*">
+    </div>
+
+    <div id="status" class="status">Processing and downloading...</div>
+    <div id="error" class="error"></div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const status = document.getElementById('status');
+    const error = document.getElementById('error');
+
+    // Click to upload
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    // Drag and drop events
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('hover'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('hover'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    });
+
+    function handleFile(file) {
+        if (!file.type.startsWith('image/')) {
+            showError('Please upload an image file.');
+            return;
+        }
+
+        status.style.display = 'block';
+        error.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Upload failed');
+            return response.blob();
+        })
+        .then(blob => {
+            // Trigger automatic download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name.split('.')[0] + '_transparent.png';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            
+            status.textContent = '✅ Done! Your file has been downloaded.';
+            setTimeout(() => { status.style.display = 'none'; status.textContent = 'Processing and downloading...'; }, 3000);
+        })
+        .catch(err => {
+            showError('Error processing image. Please try again.');
+            console.error(err);
+        });
+    }
+
+    function showError(msg) {
+        error.textContent = msg;
+        error.style.display = 'block';
+        status.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

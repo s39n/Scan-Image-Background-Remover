@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  image_watcher:
+    build: .
+    container_name: image-watcher
+    restart: always
+    environment:
+      WHITE_THRESHOLD: 230
+      BLACK_THRESHOLD: 150
+      SLEEP_BEFORE_PROCESS: 1.0
+    volumes:
+      - /volume1/Docker/app/watch:/watch
+      - /volume1/Docker/app/completed:/completed
+      - /volume1/Docker/app/processed_originals:/processed_originals
+    command: ["python", "auto_transparent.py"]
+
+  image_web:
+    build: .
+    container_name: image-web
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      WHITE_THRESHOLD: 230
+      BLACK_THRESHOLD: 150
+    volumes:
+      - /volume1/Docker/app/watch:/watch
+      - /volume1/Docker/app/completed:/completed
+      - /volume1/Docker/app/processed_originals:/processed_originals
+    command: ["python", "web_app.py"]

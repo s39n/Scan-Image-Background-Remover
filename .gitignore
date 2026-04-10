@@ -1,0 +1,12 @@
+completed/
+output/
+processed_originals/
+watch/
+*.png
+*.jpg
+*.JPG
+*.jpeg
+*.db
+Thumbs.db
+__pycache__/
+.env
