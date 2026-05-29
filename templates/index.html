@@ -3,153 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Background Remover & Enhancer</title>
+    <title>Image & Text Utility Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --success: #059669;
+            --error: #dc2626;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: radial-gradient(circle at top right, #e2e8f0, #f8fafc);
+            color: var(--text-main);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
+            padding: 2rem 0;
         }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-        }
-        h1 { margin-bottom: 0.5rem; color: #1a1a1a; }
-        p { color: #666; margin-bottom: 2rem; }
-        
-        #drop-zone {
-            border: 2px dashed #4a90e2;
-            border-radius: 8px;
-            padding: 40px;
-            cursor: pointer;
-            transition: background 0.3s, border-color 0.3s;
-            background: #f8fbff;
-        }
-        #drop-zone.hover {
-            background: #e1f0ff;
-            border-color: #2171cd;
-        }
-        #drop-zone p { margin: 0; font-weight: 500; color: #4a90e2; }
 
-        .status {
-            margin-top: 1rem;
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, var(--primary), #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 95%;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            min-width: 0; /* Fixes grid item overflow */
+        }
+
+        h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+        .card-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+
+        /* --- Image Processor Styles --- */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 50px 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fcfdfe;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .drop-zone:hover, .drop-zone.hover {
+            border-color: var(--primary);
+            background: #f5f7ff;
+            transform: translateY(-2px);
+        }
+
+        .drop-zone .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .drop-zone p { margin: 0; font-weight: 600; color: var(--primary); }
+        .drop-zone small { color: var(--text-muted); display: block; margin-top: 5px; }
+
+        #file-input { display: none; }
+
+        /* --- Text Cleaner Styles --- */
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            box-sizing: border-box;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            outline: none;
+            background: #fcfdfe;
+        }
+        
+        textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+
+        .options { margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn:disabled { background-color: #cbd5e1; cursor: not-allowed; transform: none; }
+
+        .btn-secondary { background-color: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); margin-top: 10px; }
+        .btn-secondary:hover { background-color: #e2e8f0; }
+
+        /* --- Shared Components --- */
+        .message {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 12px;
             font-size: 0.9rem;
-            color: #28a745;
+            font-weight: 500;
             display: none;
         }
-        .error {
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #dc3545;
-            display: none;
+
+        .msg-info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .msg-success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+        .msg-error { background: #fef2f2; color: var(--error); border: 1px solid #fecaca; }
+
+        .result-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+        }
+
+        .result-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .output-box {
+            font-family: monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+        
+        .output-box.single-line { 
+            white-space: nowrap; 
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Image Processor</h1>
-    <p>Drag an image here to make the background transparent and sharpen the black details.</p>
-    
-    <div id="drop-zone">
-        <p>Drop image here or click to upload</p>
-        <input type="file" id="file-input" style="display: none;" accept="image/*">
+<header>
+    <h1>Utility Dashboard</h1>
+    <p>Clean your text and process your images in one place.</p>
+</header>
+
+<div class="dashboard">
+    <!-- Image Processor Card -->
+    <div class="card">
+        <h2>Image Processor</h2>
+        <p class="card-desc">Remove white backgrounds and sharpen black details for crisp transparency.</p>
+        
+        <div id="image-drop-zone" class="drop-zone">
+            <span class="icon">🖼️</span>
+            <p>Drag & Drop Image</p>
+            <small>or click to browse</small>
+            <input type="file" id="image-file-input" accept="image/*">
+        </div>
+
+        <div id="image-msg-processing" class="message msg-info">✨ Processing image...</div>
+        <div id="image-msg-success" class="message msg-success">✅ Processed and downloaded!</div>
+        <div id="image-msg-error" class="message msg-error"></div>
     </div>
 
-    <div id="status" class="status">Processing and downloading...</div>
-    <div id="error" class="error"></div>
+    <!-- Text Cleaner Card -->
+    <div class="card">
+        <h2>Text Cleaner</h2>
+        <p class="card-desc">Remove non-ASCII characters and normalize whitespace from your text.</p>
+        
+        <form id="text-clean-form">
+            <textarea id="text-input" placeholder="Paste messy text here..."></textarea>
+            
+            <div class="options">
+                <input type="checkbox" id="text-one-line" name="cleaning_mode" value="one_line">
+                <label for="text-one-line">Clean to a single line</label>
+            </div>
+
+            <button type="submit" class="btn">Clean Text</button>
+        </form>
+
+        <div id="text-result-section" style="display: none;">
+            <div class="result-card">
+                <div class="result-header">
+                    <span>Result</span>
+                    <span>Removed: <span id="text-artifacts-count">0</span></span>
+                </div>
+                <div id="text-output" class="output-box"></div>
+            </div>
+            <button id="text-copy-btn" class="btn btn-secondary">Copy Result</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const status = document.getElementById('status');
-    const error = document.getElementById('error');
+    // --- Image Processing Logic ---
+    const imgDropZone = document.getElementById('image-drop-zone');
+    const imgInput = document.getElementById('image-file-input');
+    const imgMsgProcessing = document.getElementById('image-msg-processing');
+    const imgMsgSuccess = document.getElementById('image-msg-success');
+    const imgMsgError = document.getElementById('image-msg-error');
 
-    // Click to upload
-    dropZone.addEventListener('click', () => fileInput.click());
+    imgDropZone.addEventListener('click', () => imgInput.click());
 
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files.length) handleFile(e.target.files[0]);
+    imgInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleImageFile(e.target.files[0]);
     });
 
-    // Drag and drop events
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(name => {
+        imgDropZone.addEventListener(name, (e) => { e.preventDefault(); e.stopPropagation(); });
     });
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.add('hover'), false);
+    ['dragenter', 'dragover'].forEach(name => {
+        imgDropZone.addEventListener(name, () => imgDropZone.classList.add('hover'));
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, () => dropZone.classList.remove('hover'), false);
+    ['dragleave', 'drop'].forEach(name => {
+        imgDropZone.addEventListener(name, () => imgDropZone.classList.remove('hover'));
     });
 
-    dropZone.addEventListener('drop', (e) => {
+    imgDropZone.addEventListener('drop', (e) => {
         const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
+        if (file) handleImageFile(file);
     });
 
-    function handleFile(file) {
+    function handleImageFile(file) {
         if (!file.type.startsWith('image/')) {
-            showError('Please upload an image file.');
+            showImageError('Please upload a valid image.');
             return;
         }
 
-        status.style.display = 'block';
-        error.style.display = 'none';
+        imgMsgProcessing.style.display = 'block';
+        imgMsgSuccess.style.display = 'none';
+        imgMsgError.style.display = 'none';
 
         const formData = new FormData();
         formData.append('file', file);
 
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
+        fetch('/api/image/process', { method: 'POST', body: formData })
         .then(response => {
-            if (!response.ok) throw new Error('Upload failed');
+            if (!response.ok) throw new Error('Processing failed');
             return response.blob();
         })
         .then(blob => {
-            // Trigger automatic download
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = file.name.split('.')[0] + '_transparent.png';
             document.body.appendChild(a);
             a.click();
+            window.URL.revokeObjectURL(url);
             a.remove();
             
-            status.textContent = '✅ Done! Your file has been downloaded.';
-            setTimeout(() => { status.style.display = 'none'; status.textContent = 'Processing and downloading...'; }, 3000);
+            imgMsgProcessing.style.display = 'none';
+            imgMsgSuccess.style.display = 'block';
+            setTimeout(() => imgMsgSuccess.style.display = 'none', 5000);
         })
         .catch(err => {
-            showError('Error processing image. Please try again.');
-            console.error(err);
+            imgMsgProcessing.style.display = 'none';
+            showImageError('Error processing image. Please try again.');
         });
     }
 
-    function showError(msg) {
-        error.textContent = msg;
-        error.style.display = 'block';
-        status.style.display = 'none';
+    function showImageError(msg) {
+        imgMsgError.textContent = msg;
+        imgMsgError.style.display = 'block';
     }
+
+    // --- Text Cleaning Logic ---
+    const textForm = document.getElementById('text-clean-form');
+    const textInput = document.getElementById('text-input');
+    const textOneLine = document.getElementById('text-one-line');
+    const textOutput = document.getElementById('text-output');
+    const textArtifactsCount = document.getElementById('text-artifacts-count');
+    const textResultSection = document.getElementById('text-result-section');
+    const textCopyBtn = document.getElementById('text-copy-btn');
+
+    textForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = textInput.value;
+        if (!text) return;
+
+        const mode = textOneLine.checked ? 'one_line' : 'standard';
+
+        fetch('/api/text/clean', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ text: text, cleaning_mode: mode })
+        })
+        .then(res => res.json())
+        .then(data => {
+            textOutput.textContent = data.cleaned_text;
+            textArtifactsCount.textContent = data.artifacts_removed;
+            
+            if (mode === 'one_line') textOutput.classList.add('single-line');
+            else textOutput.classList.remove('single-line');
+            
+            textResultSection.style.display = 'block';
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error cleaning text.');
+        });
+    });
+
+    textCopyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(textOutput.textContent);
+        const originalText = textCopyBtn.textContent;
+        textCopyBtn.textContent = 'Copied!';
+        setTimeout(() => textCopyBtn.textContent = originalText, 2000);
+    });
 </script>
 
 </body>
