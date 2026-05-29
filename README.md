@@ -1,55 +1,71 @@
-# Image Background Remover & Enhancer (Dual-Mode)
+# ImageDocTransparent
 
-A dual-mode Python application that makes image backgrounds transparent and enhances black contrast (perfect for sheet music, sketches, or text).
+A dual-purpose utility for automated image transparency processing and text cleaning. This project provides both a user-friendly web interface and a background service for batch processing.
 
-## 🚀 Features
-- **Mode 1: Folder Watcher** - Automatically processes any image dropped into a specific folder.
-- **Mode 2: Web App** - Drag and drop images into your browser for instant processing and download.
-- **Smart Transparency** - Automatically removes near-white backgrounds.
-- **Contrast Boost** - Forces dark/gray pixels to pure black to make details "stand out."
-- **No Zipping** - Delivers individual PNG files directly.
+## 🌟 Features
 
-## 🛠️ Installation & Setup
+### 1. Image Transparency Processor
+- **Web Interface:** Upload PNG/JPG/JPEG files to automatically remove white/near-white backgrounds.
+- **Auto Watcher:** Monitors a specific folder (`/watch`) and automatically processes any images dropped into it.
+- **Contrast Enhancement:** Automatically sharpens black details to ensure high-quality, crisp results for scanned documents or line art.
+
+### 2. Text Cleaner
+- Removes non-ASCII characters and artifacts from pasted text.
+- Supports "Single Line Mode" for flattening text or "Standard Mode" for preserving structure while cleaning whitespace.
+
+## 🛠️ Project Structure
+
+- `web_app.py`: Flask-based web application.
+- `auto_transparent.py`: Background service using `watchdog` to monitor and process images.
+- `processor.py`: Core logic for image manipulation.
+- `templates/`: HTML templates for the web interface.
+- `docker-compose.yml`: Orchestration for running both the web app and watcher simultaneously.
+
+## 🚀 Getting Started
 
 ### Using Docker (Recommended)
-1.  **Configure Volumes:** Open `docker-compose.yml` and update the volume paths to match your local folders (e.g., replace `/volume1/Docker/app/` with your actual path).
-2.  **Run the App:**
-    ```bash
-    docker-compose up -d --build
-    ```
-3.  **Access the Web App:** Go to `http://localhost:5000` in your browser.
-4.  **Use the Watcher:** Drop images into your local `/watch` folder; the results will appear in `/completed`.
 
-### Manual Setup (Without Docker)
-1.  **Install Requirements:**
-    ```bash
-    pip install pillow numpy watchdog flask
-    ```
-2.  **Run the Web App:**
-    ```bash
-    python web_app.py
-    ```
-3.  **Run the Folder Watcher:**
-    ```bash
-    python auto_transparent.py
-    ```
+1. **Build and Start:**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+2. **Access the Web App:**
+   Open your browser and go to `http://localhost:5000`.
+
+3. **Use the Auto Watcher:**
+   Drop images into the directory mapped to `/watch` (configured in `docker-compose.yml`). The processed files will appear in `/completed`, and the originals will be moved to `/processed_originals`.
+
+### Local Installation
+
+1. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Run the Web App:**
+   ```bash
+   python web_app.py
+   ```
+
+3. **Run the Auto Watcher:**
+   Set the required environment variables (optional) and run:
+   ```bash
+   python auto_transparent.py
+   ```
 
 ## ⚙️ Configuration
-You can tune the sensitivity using environment variables in `docker-compose.yml`:
+
+The following environment variables can be used to tune the image processing:
 
 | Variable | Default | Description |
-| :--- | :--- | :--- |
-| `WHITE_THRESHOLD` | `230` | Higher = stricter (only pure white becomes transparent). Lower = more aggressive. |
-| `BLACK_THRESHOLD` | `150` | Higher = more aggressive (makes dark grays pure black). |
-| `WATCH_FOLDER` | `/watch` | The folder to monitor for new images. |
-| `COMPLETED_FOLDER` | `/completed` | Where the processed PNGs are saved. |
+|----------|---------|-------------|
+| `WHITE_THRESHOLD` | `225` | Pixels brighter than this become transparent (0-255). |
+| `BLACK_THRESHOLD` | `150` | Pixels darker than this are sharpened to pure black. |
+| `WATCH_FOLDER` | `/watch` | Directory for the auto-watcher to monitor. |
+| `COMPLETED_FOLDER` | `/completed` | Directory where processed images are saved. |
+| `ORIGINALS_FOLDER` | `/processed_originals` | Directory where original files are archived. |
 
-## 📁 Project Structure
-- `web_app.py`: Flask server for the browser interface.
-- `auto_transparent.py`: Watchdog script for folder automation.
-- `processor.py`: Core logic for transparency and contrast enhancement.
-- `templates/`: HTML/JS for the web interface.
-- `docker-compose.yml` & `dockerfile`: Containerization setup.
+## 🧹 Maintenance
 
-## 📄 License
-MIT
+This directory has been cleaned of unused FastAPI prototypes (`main.py`, `main_app.py`) and redundant templates to maintain a lean codebase.
