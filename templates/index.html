@@ -80,7 +80,7 @@
         }
 
         h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
-        .card-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+        .card-desc { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }     
 
         /* --- Image Processor Styles --- */
         .drop-zone {
@@ -121,12 +121,12 @@
             outline: none;
             background: #fcfdfe;
         }
-        
+
         textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
 
-        .options { margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; font-weight: 500; }
-        
-        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+        .options { margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; font-weight: 500; }    
+
+        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }    
 
         .btn {
             background-color: var(--primary);
@@ -189,9 +189,9 @@
             overflow-y: auto;
             overflow-x: auto;
         }
-        
-        .output-box.single-line { 
-            white-space: nowrap; 
+
+        .output-box.single-line {
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -206,8 +206,8 @@
     <!-- Image Processor Card -->
     <div class="card">
         <h2>Image Processor</h2>
-        <p class="card-desc">Remove white backgrounds and sharpen black details for crisp transparency.</p>
-        
+        <p class="card-desc">Remove white backgrounds and sharpen black details for crisp transparency.</p>     
+
         <div id="image-drop-zone" class="drop-zone">
             <span class="icon">🖼️</span>
             <p>Drag & Drop Image</p>
@@ -224,10 +224,10 @@
     <div class="card">
         <h2>Text Cleaner</h2>
         <p class="card-desc">Remove non-ASCII characters and normalize whitespace from your text.</p>
-        
+
         <form id="text-clean-form">
             <textarea id="text-input" placeholder="Paste messy text here..."></textarea>
-            
+
             <div class="options">
                 <input type="checkbox" id="text-one-line" name="cleaning_mode" value="one_line">
                 <label for="text-one-line">Clean to a single line</label>
@@ -307,7 +307,7 @@
             a.click();
             window.URL.revokeObjectURL(url);
             a.remove();
-            
+
             imgMsgProcessing.style.display = 'none';
             imgMsgSuccess.style.display = 'block';
             setTimeout(() => imgMsgSuccess.style.display = 'none', 5000);
@@ -348,10 +348,10 @@
         .then(data => {
             textOutput.textContent = data.cleaned_text;
             textArtifactsCount.textContent = data.artifacts_removed;
-            
+
             if (mode === 'one_line') textOutput.classList.add('single-line');
             else textOutput.classList.remove('single-line');
-            
+
             textResultSection.style.display = 'block';
         })
         .catch(err => {
@@ -360,8 +360,38 @@
         });
     });
 
+    function fallbackCopyTextToClipboard(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // Ensure it's not visible or disruptive
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+    }
+
     textCopyBtn.addEventListener('click', () => {
-        navigator.clipboard.writeText(textOutput.textContent);
+        const text = textOutput.textContent;
+        if (!navigator.clipboard) {
+            fallbackCopyTextToClipboard(text);
+        } else {
+            navigator.clipboard.writeText(text).catch(err => {
+                fallbackCopyTextToClipboard(text);
+            });
+        }
+        
         const originalText = textCopyBtn.textContent;
         textCopyBtn.textContent = 'Copied!';
         setTimeout(() => textCopyBtn.textContent = originalText, 2000);
