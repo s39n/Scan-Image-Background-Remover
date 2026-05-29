@@ -5,16 +5,16 @@ services:
     container_name: image-watcher
     restart: always
     environment:
-      WHITE_THRESHOLD: 225
-      BLACK_THRESHOLD: 150
-      SLEEP_BEFORE_PROCESS: 1.0
+      WHITE_THRESHOLD: ${WHITE_THRESHOLD:-225}
+      BLACK_THRESHOLD: ${BLACK_THRESHOLD:-150}
+      SLEEP_BEFORE_PROCESS: ${SLEEP_BEFORE_PROCESS:-1.0}
       WATCH_FOLDER: "/watch"
       COMPLETED_FOLDER: "/completed"
       ORIGINALS_FOLDER: "/processed_originals"
     volumes:
-      - ./watch:/watch
-      - ./completed:/completed
-      - ./processed_originals:/processed_originals
+      - ${WATCH_DIR:-./watch}:/watch
+      - ${COMPLETED_DIR:-./completed}:/completed
+      - ${ORIGINALS_DIR:-./processed_originals}:/processed_originals
     command: ["python", "auto_transparent.py"]
 
   image_web:
@@ -22,11 +22,11 @@ services:
     container_name: image-web
     restart: always
     ports:
-      - "5000:5000"
+      - "${APP_PORT:-5000}:5000"
     environment:
       PORT: 5000
-      WHITE_THRESHOLD: 225
-      BLACK_THRESHOLD: 150
+      WHITE_THRESHOLD: ${WHITE_THRESHOLD:-225}
+      BLACK_THRESHOLD: ${BLACK_THRESHOLD:-150}
     command: ["python", "web_app.py"]
     depends_on:
       - image_watcher

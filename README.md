@@ -25,16 +25,23 @@ A dual-purpose utility for automated image transparency processing and text clea
 
 ### Using Docker (Recommended)
 
-1. **Build and Start:**
+1. **Configure Settings:** 
+   Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+   Edit `.env` to set your desired `APP_PORT` and host folder paths (`WATCH_DIR`, etc.).
+
+2. **Build and Start:**
    ```bash
    docker-compose up -d --build
    ```
 
-2. **Access the Web App:**
-   Open your browser and go to `http://localhost:5000`.
+3. **Access the Web App:**
+   Open your browser and go to `http://localhost:5000` (or the port you configured).
 
-3. **Use the Auto Watcher:**
-   Drop images into the directory mapped to `/watch` (configured in `docker-compose.yml`). The processed files will appear in `/completed`, and the originals will be moved to `/processed_originals`.
+4. **Use the Auto Watcher:**
+   Drop images into your configured watch directory. The processed files will appear in the completed directory.
 
 ### Local Installation
 
@@ -55,18 +62,18 @@ A dual-purpose utility for automated image transparency processing and text clea
 
 ## ⚙️ Configuration
 
-You can configure the application using either **Environment Variables** or **Command Line Arguments**.
+You can configure the application using either a **.env file**, **Environment Variables**, or **Command Line Arguments**.
 
-### Environment Variables
+### Environment Variables (.env)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `5000` | Port for the web application. |
+| `APP_PORT` | `5000` | Host port for the web application (Docker only). |
+| `WATCH_DIR` | `./watch` | Host directory to monitor (Docker only). |
+| `COMPLETED_DIR` | `./completed` | Host directory for results (Docker only). |
+| `ORIGINALS_DIR` | `./processed_originals` | Host directory for archives (Docker only). |
 | `WHITE_THRESHOLD` | `225` | Pixels brighter than this become transparent (0-255). |
 | `BLACK_THRESHOLD` | `150` | Pixels darker than this are sharpened to pure black. |
-| `WATCH_FOLDER` | `watch` | Directory for the auto-watcher to monitor. |
-| `COMPLETED_FOLDER` | `completed` | Directory where processed images are saved. |
-| `ORIGINALS_FOLDER` | `processed_originals` | Directory where original files are archived. |
 | `SLEEP_BEFORE_PROCESS`| `1.0` | Delay in seconds before processing a new file. |
 
 ### Command Line Arguments
