@@ -6,7 +6,7 @@ A dual-purpose utility for automated image transparency processing and text clea
 
 ### 1. Image Transparency Processor
 - **Web Interface:** Upload PNG/JPG/JPEG files to automatically remove white/near-white backgrounds.
-- **Auto Watcher:** Monitors a specific folder (`/watch`) and automatically processes any images dropped into it.
+- **Auto Watcher:** Monitors a specific folder and automatically processes any images dropped into it.
 - **Contrast Enhancement:** Automatically sharpens black details to ensure high-quality, crisp results for scanned documents or line art.
 
 ### 2. Text Cleaner
@@ -45,26 +45,45 @@ A dual-purpose utility for automated image transparency processing and text clea
 
 2. **Run the Web App:**
    ```bash
-   python web_app.py
+   python web_app.py --port 5000 --white-threshold 225
    ```
 
 3. **Run the Auto Watcher:**
-   Set the required environment variables (optional) and run:
    ```bash
-   python auto_transparent.py
+   python auto_transparent.py --watch my_watch_folder --completed my_output_folder
    ```
 
 ## ⚙️ Configuration
 
-The following environment variables can be used to tune the image processing:
+You can configure the application using either **Environment Variables** or **Command Line Arguments**.
+
+### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `PORT` | `5000` | Port for the web application. |
 | `WHITE_THRESHOLD` | `225` | Pixels brighter than this become transparent (0-255). |
 | `BLACK_THRESHOLD` | `150` | Pixels darker than this are sharpened to pure black. |
-| `WATCH_FOLDER` | `/watch` | Directory for the auto-watcher to monitor. |
-| `COMPLETED_FOLDER` | `/completed` | Directory where processed images are saved. |
-| `ORIGINALS_FOLDER` | `/processed_originals` | Directory where original files are archived. |
+| `WATCH_FOLDER` | `watch` | Directory for the auto-watcher to monitor. |
+| `COMPLETED_FOLDER` | `completed` | Directory where processed images are saved. |
+| `ORIGINALS_FOLDER` | `processed_originals` | Directory where original files are archived. |
+| `SLEEP_BEFORE_PROCESS`| `1.0` | Delay in seconds before processing a new file. |
+
+### Command Line Arguments
+
+#### `web_app.py`
+- `--port`: Port to run the server on.
+- `--host`: Host to bind to.
+- `--white-threshold`: White threshold for transparency.
+- `--black-threshold`: Black threshold for sharpening.
+
+#### `auto_transparent.py`
+- `--watch`: Folder to watch for new images.
+- `--completed`: Folder to save processed images.
+- `--originals`: Folder to archive original images.
+- `--white-threshold`: White threshold for transparency.
+- `--black-threshold`: Black threshold for sharpening.
+- `--sleep`: Seconds to wait before processing a new file.
 
 ## 🧹 Maintenance
 

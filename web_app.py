@@ -1,15 +1,16 @@
 import os
 import io
 import re
+import argparse
 from flask import Flask, render_template, request, send_file, jsonify
 from PIL import Image
 from processor import process_image_data
 
 app = Flask(__name__)
 
-# Config from environment
-WHITE_THRESHOLD = int(os.getenv("WHITE_THRESHOLD", 225))
-BLACK_THRESHOLD = int(os.getenv("BLACK_THRESHOLD", 150))
+# Config - will be updated by main()
+WHITE_THRESHOLD = 225
+BLACK_THRESHOLD = 150
 
 # --- Page Routes ---
 
@@ -74,4 +75,17 @@ def clean_text():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    parser = argparse.ArgumentParser(description="ImageDocTransparent Web App")
+    parser.add_argument('--port', type=int, default=int(os.getenv("PORT", 5000)), help="Port to run the server on")
+    parser.add_argument('--host', default=os.getenv("HOST", "0.0.0.0"), help="Host to bind the server to")
+    parser.add_argument('--white-threshold', type=int, default=int(os.getenv("WHITE_THRESHOLD", 225)), help="White threshold for transparency")
+    parser.add_argument('--black-threshold', type=int, default=int(os.getenv("BLACK_THRESHOLD", 150)), help="Black threshold for sharpening")
+    args = parser.parse_args()
+
+    WHITE_THRESHOLD = args.white_threshold
+    BLACK_THRESHOLD = args.black_threshold
+
+    print(f"🚀 Starting Web App on {args.host}:{args.port}")
+    print(f"⚙️  Thresholds: White={WHITE_THRESHOLD}, Black={BLACK_THRESHOLD}")
+    
+    app.run(host=args.host, port=args.port)
